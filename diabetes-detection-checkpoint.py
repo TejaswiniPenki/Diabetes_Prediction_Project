@@ -23,8 +23,10 @@ X = df.iloc[:, :-1].values
 y = df.iloc[:, -1].values
 
 # Handle class imbalance using SMOTE
-smote = SMOTE(random_state=42)
-X, y = smote.fit_resample(X, y)
+use_smote = True  # Change to False to disable SMOTE
+if use_smote:
+    smote = SMOTE(random_state=42)
+    X, y = smote.fit_resample(X, y)
 
 # Split into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -47,7 +49,7 @@ stacked_model = StackingClassifier(
 # Train the stacked model
 stacked_model.fit(X_train, y_train)
 
-# FUNCTION
+# FUNCTION: User Input
 def user_report():
     pregnancies = st.sidebar.slider('Pregnancies', 0, 17, 3)
     glucose = st.sidebar.slider('Glucose', 0, 200, 120)
@@ -79,14 +81,24 @@ st.write(user_data)
 # Standardize user input
 user_data_scaled = scaler.transform(user_data)
 
-# PREDICTION
-user_result = stacked_model.predict(user_data_scaled)
+
+# PREDICTION & PROBABILITY
+user_prob = stacked_model.predict_proba(user_data_scaled)[0][1]  # Probability of being diabetic
+st.subheader("Prediction Probability:")
+st.write(f"Diabetes Probability: {user_prob:.2f}")
+
+# ADJUSTABLE THRESHOLD
+threshold = 0.5  # Change this if necessary
+if user_prob > threshold:
+    output = 'You are Diabetic'
+    color = 'red'
+else:
+    output = 'You are not Diabetic'
+    color = 'blue'
+
 
 # VISUALISATIONS
 st.title('Visualised Patient Report')
-
-# COLOR FUNCTION
-color = 'red' if user_result[0] == 1 else 'blue'
 
 # Plotting Function
 def plot_graph(x, y, user_x, user_y, title, palette, xticks, yticks):
@@ -107,9 +119,8 @@ plot_graph(7, 4, user_data['Age'][0], user_data['Insulin'][0], 'Insulin Value Gr
 plot_graph(7, 5, user_data['Age'][0], user_data['BMI'][0], 'BMI Value Graph', 'rainbow', (10, 100, 5), (0, 70, 5))
 plot_graph(7, 6, user_data['Age'][0], user_data['DiabetesPedigreeFunction'][0], 'DPF Value Graph', 'YlOrBr', (10, 100, 5), (0, 3, 0.2))
 
-# OUTPUT
-st.subheader('Your Report:')
-output = 'You are not Diabetic' if user_result[0] == 1 else 'You are Diabetic'
+#OUTPUT
+st.subheader('Your Report')
 st.title(output)
 
 # ACCURACY
