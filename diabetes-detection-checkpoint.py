@@ -23,7 +23,7 @@ X = df.iloc[:, :-1].values
 y = df.iloc[:, -1].values
 
 # Handle class imbalance using SMOTE
-use_smote = True  # Change to False to disable SMOTE
+use_smote = True # Change to False to disable SMOTE
 if use_smote:
     smote = SMOTE(random_state=42)
     X, y = smote.fit_resample(X, y)
@@ -83,12 +83,12 @@ user_data_scaled = scaler.transform(user_data)
 
 
 # PREDICTION & PROBABILITY
-user_prob = stacked_model.predict_proba(user_data_scaled)[0][1]  # Probability of being diabetic
+user_prob = stacked_model.predict_proba(user_data_scaled)[0][1] # Probability of being diabetic
 st.subheader("Prediction Probability:")
 st.write(f"Diabetes Probability: {user_prob:.2f}")
 
 # ADJUSTABLE THRESHOLD
-threshold = 0.5  # Change this if necessary
+threshold = 0.5 # Change this if necessary
 if user_prob > threshold:
     output = 'You are Diabetic'
     color = 'red'
